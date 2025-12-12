@@ -1,0 +1,25 @@
+{
+  "name": "catcatch",
+  "version-string": "0.1.0",
+  "dependencies": [
+    {
+      "name": "gtest"
+    },
+    {
+      "name": "sdl3",
+      "features": [
+        "vulkan",
+        "wayland"
+      ]
+    },
+    {
+      "name": "sdl3-image",
+      "features": [
+        "png"
+      ]
+    },
+    {
+      "name": "sdl3-ttf"
+    }
+  ]
+}
