@@ -1,48 +1,58 @@
-## Goals
-- [x] Land on theme
-- [x] Plan our mechanics
-- [ ] Get core setup code in place + git repo
-
-# Concepts: Cat Invaders
+# Requirements
 
 ## Technical
+### Must Have
 - multi-threading for game state | renderer
-- basic collision detection
-- a base level of animation for models
-  - disable AA for textures globally
-- dynamic creation / deletion of entities
-- game menus / settings menus / ...
-- utilize vWin from SDL
-- create web build => WebGL (deploy to website)
-- save to disc
+- virtual sizing
+- web build (WebGL)
+### Nice to Have
+- basic animation (given time)
 
-## Theme
-- 16/32 bit graphics
-- setting
-  - right-side & top border tree for cats to fall from
-  - grass / ground texture below
-    - parallax style hills in the distance
-  - skybox using procedural stars / rain / ...
-- visual / graphical theme
-  - cats: 3-5 cat models - color variants (main body / spots: perlin noise spots), flip, rotate, animate
-  - player controls a cardboard box: idle / movement animations, responsive "catch", align for dropping "into" the box
-  - negative catch: limb? bug?
-- color palette
-  - game entities: bright / vibrant
-  - environment: darker / low saturation
+## Theme: GameDev
+- 16 bit graphics
+- cards
+  - overlay, simple card style
+- environment:
+  - menu / inventory style
+- color palette: bright / vibrant / fun / warm
 
-## Game Loop
-- catch cats
-  - gain points when catching a cat
-- "lives" system
-  - lose a life when catching <negative_catch>
-  - lose a life when failing to catch a cat
-- increase fall speed / spawn rate based on time
-  - tweak bad : good spawn rates
+# Code Structure
 
-## Gameplay Mechanics
-- top-down
-- 2d plane for movement
-- auto-run / move forward
-- single player game
-- shoot weapon in line, hit / no hit on enemy
+## SINGLETON: ScreenManager - defines the API for screens to render out
+  - maps GameState from GameManager to the appropriate Screen for rendering
+  - connects to SDL renderer and GameManager
+## SINGLETON: GameManager - manages the overall game state
+  - track all run details
+    - modifier, decks, cycle, score, ...
+  - methods to fetch options from deck
+  - method to select an option
+  - keep history details (actions taken, outcomes, ...)
+  - current GameState
+    - provides GameState to ScreenManager to trigger renderer
+    - houses all state machine logic to transition between GameStates
+  - connects to SDL event handler
+    - show options for cards
+    - transition between currently selected card
+## ENUM: GameState
+  - MainMenu
+  - SettingsMenu
+  - NewGame | Set game modifiers
+  - NewCycle | Set cycle modifiers
+  - DayCycle | Make operational decisions
+  - NightCycle | See the outcomes
+  - EndCycle | Cycle summary, payouts, leveling, ...
+  - EndGame | Game summary, score, stats
+## ENUM: CardState
+  - IDLE
+  - SELECT
+## CLASS: Sprite<T> extend Object
+  - AnimationMap: Map<T, vector<SDL_RectF>>
+  - FrameRate
+  - CurrentFrame
+## CLASS: Object
+  - Texture: SDL_Texture | sprite map
+  - Position: SDL_RectF | where on screen
+## CLASS: TextObject extend Object
+  - Text: string
+  - Font: SDL_Font
+  - TextPosition: SDL_RectF
