@@ -5,6 +5,12 @@
 
 #include "GameManager.h"
 
+/*
+## SINGLETON: ScreenManager - defines the API for screens to render out
+  - maps GameState from GameManager to the appropriate Screen for rendering
+  - connects to SDL renderer and GameManager
+*/
+
 class ScreenManager {
  private:
   SDL_Renderer* renderer = nullptr;
