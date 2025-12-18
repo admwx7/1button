@@ -27,6 +27,12 @@ class ButtonEntity : public TextEntity {
       : TextEntity(texture, textureMap[state], position, text, offset),
         textureMap(textureMap),
         currentState(state) {}
+  ~ButtonEntity() {
+    for (auto& [state, rect] : textureMap) {
+      delete rect;
+    }
+    textureMap.clear();
+  }
   bool virtual render(SDL_Renderer* renderer, TTF_Font* font) {
     src = textureMap.at(currentState);
     return TextEntity::render(renderer, font);

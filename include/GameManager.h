@@ -28,7 +28,7 @@ class GameManager {
   SceneManager* sceneManager = nullptr;
   TextureManager* textureManager = nullptr;
   uint64_t keyHoldStart = 0;                // milliseconds
-  const uint64_t KEY_HOLD_THRESHOLD = 500;  // milliseconds
+  const uint64_t KEY_HOLD_THRESHOLD = 800;  // milliseconds
   // TODO: ensure this is reset to 0 when scene is changed
   int selectedOptionIndex = 0;
 

@@ -19,18 +19,18 @@ SDL_AppResult GameManager::handleEvent(SDL_Event* event) {
   switch (event->type) {
     case SDL_EVENT_QUIT:
       return SDL_APP_SUCCESS;
+    case SDL_EVENT_MOUSE_BUTTON_UP:
     case SDL_EVENT_KEY_UP:
-      if (event->key.key == SDLK_SPACE) {
-        if (keyHeldDuration > KEY_HOLD_THRESHOLD) {
-          longPressAction();
-        } else {
-          shortPressAction();
-        }
-        keyHoldStart = 0;
+      if (keyHeldDuration > KEY_HOLD_THRESHOLD) {
+        longPressAction();
+      } else {
+        shortPressAction();
       }
+      keyHoldStart = 0;
       return SDL_APP_CONTINUE;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
     case SDL_EVENT_KEY_DOWN:
-      if (event->key.key == SDLK_SPACE && keyHoldStart == 0) {
+      if (keyHoldStart <= 0) {
         keyHoldStart = SDL_GetTicks();
       }
       return SDL_APP_CONTINUE;

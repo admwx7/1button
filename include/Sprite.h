@@ -21,9 +21,10 @@ class Sprite : public Entity {
     for (auto& [key, frames] : animationMap) {
       for (auto& frame : frames) {
         delete frame;
-        frame = NULL;
+        frame = nullptr;
       }
     }
+    animationMap.clear();
   }
   bool virtual render(SDL_Renderer* renderer) const {
     auto frames = animationMap.at(currentState);
