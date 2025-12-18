@@ -15,8 +15,10 @@ class Sprite : public Entity {
   T currentState;
 
  public:
-  Sprite(SDL_Texture* tex, SDL_FRect* src, SDL_FRect* pos, AnimationMap animMap)
-      : Entity(tex, src, pos), animationMap(animMap), frameRate(frameRate) {};
+  Sprite(SDL_Texture* tex, SDL_FRect* pos, AnimationMap animMap, T initialState)
+      : Entity(tex, NULL, pos),
+        animationMap(animMap),
+        currentState(initialState) {};
   ~Sprite() {
     for (auto& [key, frames] : animationMap) {
       for (auto& frame : frames) {
@@ -30,6 +32,7 @@ class Sprite : public Entity {
     auto frames = animationMap.at(currentState);
     src = frames.at(currentFrame);
 
+    // TODO: add an flag for repeat or not
     // Uint32 ticks = SDL_GetTicks();
     // currentFrame = (ticks / frameRate) % frames.size();
     // src = frames[currentFrame];

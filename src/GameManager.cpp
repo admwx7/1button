@@ -21,7 +21,9 @@ SDL_AppResult GameManager::handleEvent(SDL_Event* event) {
       return SDL_APP_SUCCESS;
     case SDL_EVENT_MOUSE_BUTTON_UP:
     case SDL_EVENT_KEY_UP:
-      if (keyHeldDuration > KEY_HOLD_THRESHOLD) {
+      if (keyHoldStart <= 0) {
+        // do nothing
+      } else if (keyHeldDuration > KEY_HOLD_THRESHOLD) {
         longPressAction();
       } else {
         shortPressAction();
@@ -30,8 +32,13 @@ SDL_AppResult GameManager::handleEvent(SDL_Event* event) {
       return SDL_APP_CONTINUE;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     case SDL_EVENT_KEY_DOWN:
-      if (keyHoldStart <= 0) {
+      if (keyHoldStart < 0) {
+        // do nothing
+      } else if (keyHoldStart == 0) {
         keyHoldStart = SDL_GetTicks();
+      } else if (keyHeldDuration > KEY_HOLD_THRESHOLD) {
+        longPressAction();
+        keyHoldStart = -1;
       }
       return SDL_APP_CONTINUE;
     default:
@@ -45,10 +52,10 @@ void GameManager::longPressAction() {
     case SceneManager::MAIN_MENU:
       switch (selectedOptionIndex) {
         case 0:
-          sceneManager->changeScene(SceneManager::NEW_GAME);
+          sceneManager->changeScene(SceneManager::Scene::NEW_GAME);
           break;
         case 1:
-          sceneManager->changeScene(SceneManager::SETTINGS_MENU);
+          sceneManager->changeScene(SceneManager::Scene::SETTINGS_MENU);
           break;
         case 2:
           SDL_Quit();

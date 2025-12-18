@@ -18,5 +18,4 @@ class ScreenManager {
   ScreenManager(GameState* state, GameManager* gameManager);
   ~ScreenManager();
   SDL_AppResult renderFrame();
-  void renderMainMenuScreen();
 };

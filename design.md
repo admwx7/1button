@@ -1,16 +1,27 @@
 # TODO
+- [x] web build asset
+- [x] create our itch.io page
+- [x] upload build
 - [ ] finish prototype
-  - [ ] add in scene transitions
+  - [ ] animation triggers for Sprite
+  - [ ] animate the space bar icon when holding space
   - [ ] add in card sets
   - [ ] add core game logic
-  - [ ] add "upgrade" system
-- [ ] web build asset
-- [ ] create our itch.io page
-- [ ] upload build
+    - [ ] state machine for phases
+    - [ ] track user actions / stats
+    - [ ] hooks for card logic
+    - [ ] win/loss state conditionals
+- [ ] tutorials / hints for how to play
 - [ ] add polish
+  - [ ] add "upgrade" system
   - [ ] replace placeholder assets with literally anything
+  - [ ] SFX for interactions
+  - [ ] Background music
   - [ ] expand card options - aka more content
   - [ ] balancing
+  - [ ] add in scene transitions
+  - [ ] replace background sprites with something interesting
+  - [ ] add some animation to sprites
 - [ ] upload build
 - [ ] refine our itch.io page
 
@@ -42,7 +53,7 @@ Genre: Simulation | Roguelike
 Controls: 1-Button, cycle cards, long-press to select
 Inspiration: Roguelike Deckbuilder + Business Tycoon
 
-RUN MODIFIERS | persist for the full run
+GAME MODIFIERS | persist for the full run
 - high industry turnover | people are more likely to quit
 - difficulty level | can't fall below X employees
 

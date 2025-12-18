@@ -17,6 +17,7 @@ ScreenManager* screenManager = nullptr;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
   SDL_SetAppMetadata("1Button", "1.0.0", "com.example.1button");
+  SDL_SetHint(SDL_HINT_GPU_DRIVER, "gpu");
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Failed to initialize SDL: %s", SDL_GetError());
@@ -24,7 +25,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
   }
 
   // TODO: set virtual window size, maintain aspect ratio
-  Uint32 windowFlags = SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE;
+  Uint32 windowFlags = SDL_WINDOW_RESIZABLE;
   if (!SDL_CreateWindowAndRenderer("1Button", gameState->windowDimensions.width,
                                    gameState->windowDimensions.height,
                                    windowFlags, &gameState->window,

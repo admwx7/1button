@@ -19,6 +19,8 @@ class TextureManager {
   enum TextureName {
     MENU_BACKGROUND,
     MENU_BUTTON_BACKGROUND,
+    GAME_BACKGROUND,
+    SPACE_BAR_ICON,
   };
 
  private:
@@ -27,6 +29,8 @@ class TextureManager {
   std::unordered_map<TextureName, Texture> textureCache = {
       {MENU_BACKGROUND, Texture{nullptr, "menu-background.png"}},
       {MENU_BUTTON_BACKGROUND, Texture{nullptr, "menu-button-texture.png"}},
+      {GAME_BACKGROUND, Texture{nullptr, "game-background.png"}},
+      {SPACE_BAR_ICON, Texture{nullptr, "space-bar.png"}},
   };
   // std::vector<TokenRenderInfo> renderTokenCache = {};
 
