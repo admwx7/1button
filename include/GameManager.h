@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include <assert.h>
 
 #include "Entity.h"
 #include "GameState.h"
@@ -52,9 +53,12 @@ class GameManager {
   TextureManager* textureManager = nullptr;
   uint64_t keyHoldStart = 0;                 // milliseconds
   const uint64_t KEY_HOLD_THRESHOLD = 1000;  // milliseconds
-  int selectedOptionIndex = 0;
+  // TODO: update this to a vector of vectors to track game => selection
   std::vector<CardEntity*> selectedCards = {};
-  Entity* targetEntity = nullptr;
+  std::vector<Entity*> selectableEntities = {};
+  std::vector<Entity*>::iterator selectedOptionIterator = {};
+
+  void sceneChangedCallback();
 
  protected:
   void longPressAction();

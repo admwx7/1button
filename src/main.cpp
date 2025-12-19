@@ -61,9 +61,13 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
   delete gameState;
+  gameState = nullptr;
   delete textureManager;
+  textureManager = nullptr;
   delete gameManager;
+  gameManager = nullptr;
   delete screenManager;
+  screenManager = nullptr;
   TTF_Quit();
   SDL_Quit();
 }

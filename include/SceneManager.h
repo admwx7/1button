@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL3/SDL.h>
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -54,11 +55,13 @@ class SceneManager {
   TextureManager* textureManager = nullptr;
   std::unordered_map<Scene, std::vector<SceneComponent>> scenes = {};
   std::unordered_map<SceneComponent, std::vector<Entity*>> gameEntities = {};
+  std::function<void(void)> sceneChangeCallback = nullptr;
 
  public:
   Sprite<SpaceAnimationStates>* space_icon = nullptr;
 
-  SceneManager(GameState* state, TextureManager* textureManager);
+  SceneManager(GameState* state, TextureManager* textureManager,
+               std::function<void(void)> callback);
   ~SceneManager();
   void changeScene(Scene newScene);
   Scene getCurrentScene() const;
@@ -67,7 +70,7 @@ class SceneManager {
 
  private:
   ButtonEntity* createMenuButton(
-      std::string const& text, int index, int totalButtons,
+      ButtonEntity::ButtonAction action, int index, int totalButtons,
       ButtonEntity::ButtonState initialState = ButtonEntity::ButtonState::IDLE);
-  CardEntity* createCardEntity();
+  CardEntity* createCardEntity(TextureManager::TextureName textureName);
 };

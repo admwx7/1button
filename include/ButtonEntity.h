@@ -13,18 +13,23 @@
 class ButtonEntity : public TextEntity {
  public:
   enum ButtonState { IDLE, SELECTED };
+  enum ButtonAction { NEW_GAME, SETTINGS, EXIT_GAME };
 
  private:
+  inline static const std::unordered_map<ButtonAction, std::string> textMap = {
+      {NEW_GAME, "New Game"}, {SETTINGS, "Settings"}, {EXIT_GAME, "Exit Game"}};
   using ButtonTextureMap = std::unordered_map<ButtonState, SDL_FRect*>;
   ButtonTextureMap textureMap;
   ButtonState currentState = IDLE;
+  ButtonAction action;
 
  public:
   ButtonEntity(ButtonState state, ButtonTextureMap textureMap,
-               SDL_Texture* texture, SDL_FRect* position,
-               const std::string& text,
+               SDL_Texture* texture, SDL_FRect* position, ButtonAction action,
                std::pair<float, float> offset = {0.0f, 0.0f})
-      : TextEntity(texture, textureMap[state], position, text, offset),
+      : TextEntity(texture, textureMap[state], position, textMap.at(action),
+                   offset),
+        action(action),
         textureMap(textureMap),
         currentState(state) {}
   ~ButtonEntity() {
@@ -33,10 +38,13 @@ class ButtonEntity : public TextEntity {
     }
     textureMap.clear();
   }
-  virtual EntityType getType() const override { return EntityType::BUTTON; }
+  virtual Entity::EntityType getType() const override {
+    return Entity::EntityType::BUTTON;
+  }
   virtual bool render(SDL_Renderer* renderer, TTF_Font* font) {
     src = textureMap.at(currentState);
     return TextEntity::render(renderer, font);
   }
   void setState(ButtonState state) { currentState = state; }
+  ButtonAction getAction() const { return action; }
 };

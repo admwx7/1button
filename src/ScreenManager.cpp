@@ -30,6 +30,8 @@ SDL_AppResult ScreenManager::renderFrame() {
         entity->render(state->renderer);
         break;
       case Entity::EntityType::BUTTON:
+        dynamic_cast<ButtonEntity*>(entity)->render(state->renderer, font);
+        break;
       case Entity::EntityType::TEXT:
         dynamic_cast<TextEntity*>(entity)->render(state->renderer, font);
         break;

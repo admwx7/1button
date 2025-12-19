@@ -35,14 +35,16 @@ class Sprite : public Entity {
     for (auto& [key, frames] : animationMap) {
       for (auto& frame : frames) {
         delete frame;
-        frame = nullptr;
       }
+      frames.clear();
     }
     animationMap.clear();
     SDL_RemoveTimer(timerID);
   }
-  virtual EntityType getType() const override { return EntityType::SPRITE; }
-  virtual bool render(SDL_Renderer* renderer) const {
+  virtual Entity::EntityType getType() const override {
+    return Entity::EntityType::SPRITE;
+  }
+  virtual bool render(SDL_Renderer* renderer) const override {
     if (texture == nullptr) return true;
     if (!visible) return false;
     auto frames = animationMap.at(currentState);

@@ -1,13 +1,90 @@
 #include "../include/GameManager.h"
 
+void updateEntityState(std::vector<Entity*>::iterator& selectedOptionIterator,
+                       CardEntity::CardState newState) {
+  if (selectedOptionIterator != std::vector<Entity*>::iterator{}) {
+    switch ((*selectedOptionIterator)->getType()) {
+      case Entity::EntityType::BUTTON: {
+        ButtonEntity* button =
+            dynamic_cast<ButtonEntity*>(*selectedOptionIterator);
+        button->setState((newState == CardEntity::CardState::SELECTED)
+                             ? ButtonEntity::ButtonState::SELECTED
+                             : ButtonEntity::ButtonState::IDLE);
+        break;
+      }
+      case Entity::EntityType::CARD: {
+        CardEntity* card = dynamic_cast<CardEntity*>(*selectedOptionIterator);
+        card->setState(newState);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+}
+
 GameManager::GameManager(GameState* state, TextureManager* textureManager)
     : state(state), textureManager(textureManager) {
-  sceneManager = new SceneManager(state, textureManager);
+  sceneManager =
+      new SceneManager(state, textureManager,
+                       std::bind(&GameManager::sceneChangedCallback, this));
+  sceneChangedCallback();
 }
 GameManager::~GameManager() {
   delete sceneManager;
   sceneManager = nullptr;
   selectedCards.clear();
+}
+void GameManager::sceneChangedCallback() {
+  assert(sceneManager != nullptr);
+
+  updateEntityState(selectedOptionIterator, CardEntity::CardState::IDLE);
+  selectableEntities.clear();
+  switch (sceneManager->getCurrentScene()) {
+    case SceneManager::Scene::MAIN_MENU: {
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::MAIN_MENU_BUTTONS);
+      break;
+    }
+    case SceneManager::Scene::NEW_GAME:
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::CARDS_GAME_MODIFIERS);
+      break;
+    case SceneManager::Scene::EVENT_RNG:
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::CARDS_EVENTS_RNG);
+      break;
+    case SceneManager::Scene::EVENT_TIMED:
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::CARDS_EVENTS_TIMED);
+      break;
+    case SceneManager::Scene::DAY_CYCLE:
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::CARDS_CYCLE_DAY);
+      break;
+    case SceneManager::Scene::END_CYCLE:
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::CARDS_CYCLE_END);
+      break;
+    case SceneManager::Scene::NEW_CYCLE:
+      selectableEntities = sceneManager->getEntitiesForSceneComponent(
+          SceneManager::CARDS_CYCLE_MODIFIERS);
+      break;
+    // TODO: handle other scenes
+    case SceneManager::Scene::NIGHT_CYCLE:
+    case SceneManager::Scene::END_GAME:
+    case SceneManager::Scene::SETTINGS_MENU:
+      // TODO: handle settings at some point
+      break;
+    default:
+      break;
+  }
+  if (selectableEntities.empty()) {
+    selectedOptionIterator = std::vector<Entity*>::iterator{};
+  } else {
+    selectedOptionIterator = selectableEntities.begin();
+    updateEntityState(selectedOptionIterator, CardEntity::CardState::SELECTED);
+  }
 }
 SceneManager::Scene GameManager::getCurrentScene() const {
   return sceneManager->getCurrentScene();
@@ -35,17 +112,10 @@ SDL_AppResult GameManager::handleEvent(SDL_Event* event) {
       return SDL_APP_CONTINUE;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     case SDL_EVENT_KEY_DOWN:
-      if (keyHoldStart < 0) {
-        // do nothing
-      } else if (keyHoldStart == 0) {
+      if (keyHoldStart <= 0) {
         keyHoldStart = SDL_GetTicks();
         sceneManager->space_icon->setState(
             SceneManager::SpaceAnimationStates::ACTIVE);
-      } else if (keyHeldDuration > KEY_HOLD_THRESHOLD) {
-        longPressAction();
-        keyHoldStart = -1;
-        sceneManager->space_icon->setState(
-            SceneManager::SpaceAnimationStates::IDLE);
       }
       return SDL_APP_CONTINUE;
     default:
@@ -55,18 +125,17 @@ SDL_AppResult GameManager::handleEvent(SDL_Event* event) {
 }
 void GameManager::longPressAction() {
   switch (getCurrentScene()) {
-    // TODO: improve the association between index and action, now stored in
-    // targetEntity
-    case SceneManager::MAIN_MENU:
-      switch (selectedOptionIndex) {
-        case 0:
+    case SceneManager::Scene::MAIN_MENU:
+      switch (
+          dynamic_cast<ButtonEntity*>(*selectedOptionIterator)->getAction()) {
+        case ButtonEntity::NEW_GAME:
           sceneManager->changeScene(SceneManager::Scene::NEW_GAME);
           selectedCards.clear();
           break;
-        case 1:
+        case ButtonEntity::SETTINGS:
           sceneManager->changeScene(SceneManager::Scene::SETTINGS_MENU);
           break;
-        case 2:
+        case ButtonEntity::EXIT_GAME:
           SDL_Quit();
           exit(SDL_APP_SUCCESS);
           break;
@@ -74,107 +143,60 @@ void GameManager::longPressAction() {
           break;
       }
       break;
-    case SceneManager::NEW_GAME:
+    case SceneManager::Scene::NEW_GAME:
       selectCard(SceneManager::NEW_CYCLE);
       break;
-    case SceneManager::NEW_CYCLE:
+    case SceneManager::Scene::NEW_CYCLE:
       selectCard(SceneManager::DAY_CYCLE);
       break;
-    case SceneManager::DAY_CYCLE:
+    case SceneManager::Scene::DAY_CYCLE:
       // TODO: store the day case, increment when hitting this state
       selectCard(SceneManager::NIGHT_CYCLE);
       break;
-    case SceneManager::NIGHT_CYCLE:
+    case SceneManager::Scene::NIGHT_CYCLE:
       // TODO: check day counter against EVENT_TIMED triggers
       // TODO: check day counter against EVENT_RNG triggers
 
       // DAY or END_CYCLE
       break;
-    case SceneManager::END_CYCLE:
+    case SceneManager::Scene::END_CYCLE:
       // CYCLE_UNLOCK or END_GAME
       break;
-    case SceneManager::CYCLE_UNLOCK:
+    case SceneManager::Scene::CYCLE_UNLOCK:
       selectCard(SceneManager::NEW_CYCLE);
       break;
-    case SceneManager::END_GAME:
+    case SceneManager::Scene::END_GAME:
       sceneManager->changeScene(SceneManager::MAIN_MENU);
       break;
-    case SceneManager::EVENT_RNG:
+    case SceneManager::Scene::EVENT_RNG:
       // TODO: set when next EVENT_RNG will occur
       selectCard(SceneManager::NIGHT_CYCLE);
       break;
-    case SceneManager::EVENT_TIMED:
+    case SceneManager::Scene::EVENT_TIMED:
       // TODO: set when next EVENT_TIMED will occur
       selectCard(SceneManager::NIGHT_CYCLE);
       break;
+    case SceneManager::Scene::SETTINGS_MENU:
+      sceneManager->changeScene(SceneManager::MAIN_MENU);
+      break;
     default:
       break;
   }
-  selectedOptionIndex = 0;
 }
 void GameManager::selectCard(SceneManager::Scene nextScene) {
-  selectedCards.push_back(dynamic_cast<CardEntity*>(targetEntity));
-  targetEntity = nullptr;
+  selectedCards.push_back(dynamic_cast<CardEntity*>(*selectedOptionIterator));
   sceneManager->changeScene(nextScene);
 }
 void GameManager::shortPressAction() {
-  std::vector<Entity*> items;
-  switch (getCurrentScene()) {
-    case SceneManager::MAIN_MENU: {
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::MAIN_MENU_BUTTONS);
-      break;
-    }
-    case SceneManager::NEW_GAME:
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_GAME_MODIFIERS);
-      break;
-    case SceneManager::EVENT_RNG:
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_EVENTS_RNG);
-      break;
-    case SceneManager::EVENT_TIMED:
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_EVENTS_TIMED);
-      break;
-    case SceneManager::DAY_CYCLE:
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_CYCLE_DAY);
-      break;
-    case SceneManager::END_CYCLE:
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_CYCLE_END);
-      break;
-    case SceneManager::NEW_CYCLE:
-      items = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_CYCLE_MODIFIERS);
-      break;
-    // TDOO: handle other scenes
-    case SceneManager::NIGHT_CYCLE:
-    case SceneManager::END_GAME:
-    case SceneManager::CYCLE_SUMMARY:
-    case SceneManager::GAME_SUMMARY:
-    case SceneManager::SETTINGS_MENU:
-      // TODO: handle settings at some point
-      break;
-    default:
-      SDL_Log("Short press action in other scene");
-      break;
+  if (selectedOptionIterator == std::vector<Entity*>::iterator{}) {
+    return;
   }
-  if (ButtonEntity* d_ptr =
-          dynamic_cast<ButtonEntity*>(items.at(selectedOptionIndex))) {
-    d_ptr->setState(ButtonEntity::IDLE);
-  } else if (Sprite<CardEntity::CardState>* c_ptr =
-                 dynamic_cast<Sprite<CardEntity::CardState>*>(
-                     items.at(selectedOptionIndex))) {
-    c_ptr->setState(CardEntity::CardState::SELECT);
+
+  updateEntityState(selectedOptionIterator, CardEntity::CardState::IDLE);
+  if (std::next(selectedOptionIterator) == selectableEntities.end()) {
+    selectedOptionIterator = selectableEntities.begin();
+  } else {
+    selectedOptionIterator++;
   }
-  selectedOptionIndex = (selectedOptionIndex + 1) % items.size();
-  targetEntity = items.at(selectedOptionIndex);
-  if (ButtonEntity* d_ptr = dynamic_cast<ButtonEntity*>(targetEntity)) {
-    d_ptr->setState(ButtonEntity::SELECTED);
-  } else if (Sprite<CardEntity::CardState>* c_ptr =
-                 dynamic_cast<Sprite<CardEntity::CardState>*>(targetEntity)) {
-    c_ptr->setState(CardEntity::CardState::SELECT);
-  }
+  updateEntityState(selectedOptionIterator, CardEntity::CardState::SELECTED);
 }

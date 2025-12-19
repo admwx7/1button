@@ -19,7 +19,9 @@ class TextEntity : public Entity {
              const std::string& text,
              std::pair<float, float> offset = {0.0f, 0.0f})
       : Entity(tex, src, pos), text(text), offset(offset) {}
-  virtual EntityType getType() const override { return EntityType::TEXT; }
+  virtual Entity::EntityType getType() const override {
+    return Entity::EntityType::TEXT;
+  }
   bool virtual render(SDL_Renderer* renderer, TTF_Font* font) const {
     if (!Entity::render(renderer)) {
       return false;

@@ -19,25 +19,26 @@ class Entity {
   Entity(SDL_Texture* tex, SDL_FRect* src, SDL_FRect* pos)
       : texture(tex), src(src), position(pos) {}
   ~Entity() {
-    if (src) {
+    if (src != NULL) {
       delete src;
       src = NULL;
     }
-    if (position) {
+    if (position != NULL) {
       delete position;
       position = NULL;
     }
   }
   virtual EntityType getType() const { return EntityType::ENTITY; }
-  bool virtual render(SDL_Renderer* renderer) const {
+  virtual bool render(SDL_Renderer* renderer) const {
     if (texture == nullptr) return true;
     if (!visible) return false;
     return SDL_RenderTexture(renderer, texture, src, position);
   }
   void setVisible(bool vis) { visible = vis; }
   void setPosition(SDL_FRect* pos) {
-    if (position) {
+    if (position != NULL) {
       delete position;
+      position = NULL;
     }
     position = pos;
   }

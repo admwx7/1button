@@ -8,9 +8,9 @@ struct WindowDimensions {
 
 class GameState {
  public:
+  inline static WindowDimensions windowDimensions;
   SDL_Window* window = nullptr;
   SDL_Renderer* renderer = nullptr;
-  WindowDimensions windowDimensions;
 
   ~GameState() {
     SDL_DestroyRenderer(renderer);

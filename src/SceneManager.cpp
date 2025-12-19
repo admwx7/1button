@@ -1,7 +1,7 @@
 #include "../include/SceneManager.h"
 
 ButtonEntity* SceneManager::createMenuButton(
-    const std::string& text, int index, int totalButtons,
+    ButtonEntity::ButtonAction action, int index, int totalButtons,
     ButtonEntity::ButtonState initialState) {
   float buttonHeight = 32.0f;
   float buttonWidth = 128.0f;
@@ -24,14 +24,28 @@ ButtonEntity* SceneManager::createMenuButton(
            new SDL_FRect{0.0f, 32.0f, 128.0f, 32.0f}},
       },
       textureManager->getTexture(TextureManager::MENU_BUTTON_BACKGROUND),
-      buttonPosition, text, {16.0f, 8.0f});
+      buttonPosition, action, {16.0f, 8.0f});
 }
-// CardEntity* SceneManager::createCardEntity() {
-//   return new CardEntity(texture, position, card);
-// }
+CardEntity* SceneManager::createCardEntity(
+    TextureManager::TextureName textureName) {
+  switch (textureName) {
+    case TextureManager::CARD_ACTION:
+    case TextureManager::CARD_RPG:
+      break;
+    case TextureManager::MENU_BACKGROUND:
+    case TextureManager::MENU_BUTTON_BACKGROUND:
+    case TextureManager::GAME_BACKGROUND:
+    case TextureManager::SPACE_BAR_ICON:
+      return nullptr;
+  }
+  return new CardEntity(textureManager->getTexture(textureName), nullptr);
+}
 
-SceneManager::SceneManager(GameState* state, TextureManager* textureManager)
-    : state(state), textureManager(textureManager) {
+SceneManager::SceneManager(GameState* state, TextureManager* textureManager,
+                           std::function<void(void)> callback)
+    : state(state),
+      textureManager(textureManager),
+      sceneChangeCallback(callback) {
   space_icon = new Sprite<SpaceAnimationStates>(
       textureManager->getTexture(TextureManager::SPACE_BAR_ICON),
       new SDL_FRect{state->windowDimensions.width - 40.0f,
@@ -49,7 +63,6 @@ SceneManager::SceneManager(GameState* state, TextureManager* textureManager)
                new SDL_FRect{160.0f, 0.0f, 32.0f, 32.0f},
                new SDL_FRect{192.0f, 0.0f, 32.0f, 32.0f},
                new SDL_FRect{224.0f, 0.0f, 32.0f, 32.0f},
-               new SDL_FRect{256.0f, 0.0f, 32.0f, 32.0f},
                new SDL_FRect{256.0f, 0.0f, 32.0f, 32.0f},
            }},
       },
@@ -117,13 +130,16 @@ SceneManager::SceneManager(GameState* state, TextureManager* textureManager)
   gameEntities[SceneComponent::GAME_BACKGROUND] = {new Entity(
       textureManager->getTexture(TextureManager::GAME_BACKGROUND), NULL, NULL)};
   gameEntities[SceneComponent::MAIN_MENU_BUTTONS] = {
-      createMenuButton("New Game", 0, 3, ButtonEntity::ButtonState::SELECTED),
-      createMenuButton("Settings", 1, 3),
-      createMenuButton("Quit", 2, 3),
+      createMenuButton(ButtonEntity::NEW_GAME, 0, 3,
+                       ButtonEntity::ButtonState::SELECTED),
+      createMenuButton(ButtonEntity::SETTINGS, 1, 3),
+      createMenuButton(ButtonEntity::EXIT_GAME, 2, 3),
   };
   gameEntities[SceneComponent::GLOBAL_HUD] = {space_icon};
   gameEntities[SceneComponent::GAME_HUD] = {};
-  gameEntities[SceneComponent::CARDS_GAME_MODIFIERS] = {};
+  gameEntities[SceneComponent::CARDS_GAME_MODIFIERS] = {
+      createCardEntity(TextureManager::CARD_ACTION),
+      createCardEntity(TextureManager::CARD_RPG)};
   gameEntities[SceneComponent::CARDS_EVENTS_RNG] = {};
   gameEntities[SceneComponent::CARDS_EVENTS_TIMED] = {};
   gameEntities[SceneComponent::CARDS_CYCLE_MODIFIERS] = {};
@@ -137,13 +153,16 @@ SceneManager::~SceneManager() {
     for (Entity* entity : entities) {
       delete entity;
     }
+    entities.clear();
   }
-  if (space_icon) {
-    delete space_icon;
-    space_icon = nullptr;
+  gameEntities.clear();
+}
+void SceneManager::changeScene(Scene newScene) {
+  currentScene = newScene;
+  if (sceneChangeCallback != nullptr) {
+    sceneChangeCallback();
   }
 }
-void SceneManager::changeScene(Scene newScene) { currentScene = newScene; }
 SceneManager::Scene SceneManager::getCurrentScene() const {
   return currentScene;
 }
