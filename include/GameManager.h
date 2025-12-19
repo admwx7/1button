@@ -52,8 +52,9 @@ class GameManager {
   TextureManager* textureManager = nullptr;
   uint64_t keyHoldStart = 0;                 // milliseconds
   const uint64_t KEY_HOLD_THRESHOLD = 1000;  // milliseconds
-  // TODO: ensure this is reset to 0 when scene is changed
   int selectedOptionIndex = 0;
+  std::vector<CardEntity*> selectedCards = {};
+  Entity* targetEntity = nullptr;
 
  protected:
   void longPressAction();
@@ -66,4 +67,5 @@ class GameManager {
   SceneManager::Scene getCurrentScene() const;
   std::vector<Entity*> getEntitiesForCurrentScene() const;
   SDL_AppResult handleEvent(SDL_Event* event);
+  void selectCard(SceneManager::Scene nextScene);
 };

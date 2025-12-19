@@ -41,7 +41,8 @@ class Sprite : public Entity {
     animationMap.clear();
     SDL_RemoveTimer(timerID);
   }
-  bool virtual render(SDL_Renderer* renderer) const {
+  virtual EntityType getType() const override { return EntityType::SPRITE; }
+  virtual bool render(SDL_Renderer* renderer) const {
     if (texture == nullptr) return true;
     if (!visible) return false;
     auto frames = animationMap.at(currentState);

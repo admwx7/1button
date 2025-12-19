@@ -33,7 +33,8 @@ class ButtonEntity : public TextEntity {
     }
     textureMap.clear();
   }
-  bool virtual render(SDL_Renderer* renderer, TTF_Font* font) {
+  virtual EntityType getType() const override { return EntityType::BUTTON; }
+  virtual bool render(SDL_Renderer* renderer, TTF_Font* font) {
     src = textureMap.at(currentState);
     return TextEntity::render(renderer, font);
   }

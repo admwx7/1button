@@ -7,12 +7,12 @@
   - [x] animate the space bar icon when holding space
   - [ ] add in card sets
   - [ ] add core game logic
-    - [ ] state machine for phases
-    - [ ] track user actions / stats
+    - [~] state machine for phases
+    - [~] track user actions / stats
     - [ ] hooks for card logic
     - [ ] win/loss state conditionals
-- [ ] tutorials / hints for how to play
 - [ ] add polish
+  - [ ] tutorials / hints for how to play
   - [ ] add "upgrade" system
   - [ ] replace placeholder assets with literally anything
   - [ ] SFX for interactions

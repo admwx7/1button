@@ -21,11 +21,24 @@ SDL_AppResult ScreenManager::renderFrame() {
   if (!state->renderer || !font) {
     return SDL_APP_FAILURE;
   }
-  for (auto* entity : gameManager->getEntitiesForCurrentScene()) {
-    if (ButtonEntity* d_ptr = dynamic_cast<ButtonEntity*>(entity)) {
-      d_ptr->render(state->renderer, font);
-    } else {
-      entity->render(state->renderer);
+  auto entities = gameManager->getEntitiesForCurrentScene();
+  for (size_t i = 0; i < entities.size(); ++i) {
+    auto* entity = entities[i];
+    switch (entity->getType()) {
+      case Entity::EntityType::ENTITY:
+      case Entity::EntityType::SPRITE:
+        entity->render(state->renderer);
+        break;
+      case Entity::EntityType::BUTTON:
+      case Entity::EntityType::TEXT:
+        dynamic_cast<TextEntity*>(entity)->render(state->renderer, font);
+        break;
+      case Entity::EntityType::CARD:
+        dynamic_cast<CardEntity*>(entity)->render(state->renderer, i,
+                                                  entities.size());
+        break;
+      default:
+        continue;  // Skip unknown entity types
     }
   }
 

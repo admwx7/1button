@@ -21,6 +21,7 @@ class TextureManager {
     MENU_BUTTON_BACKGROUND,
     GAME_BACKGROUND,
     SPACE_BAR_ICON,
+    CARD_BACKGROUND,
   };
 
  private:
