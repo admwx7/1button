@@ -13,11 +13,11 @@
 class ButtonEntity : public TextEntity {
  public:
   enum ButtonState { IDLE, SELECTED };
-  enum ButtonAction { NEW_GAME, SETTINGS, EXIT_GAME };
+  enum ButtonAction { NEW_RUN, SETTINGS, EXIT_GAME };
 
  private:
   inline static const std::unordered_map<ButtonAction, std::string> textMap = {
-      {NEW_GAME, "New Game"}, {SETTINGS, "Settings"}, {EXIT_GAME, "Exit Game"}};
+      {NEW_RUN, "New Game"}, {SETTINGS, "Settings"}, {EXIT_GAME, "Exit Game"}};
   using ButtonTextureMap = std::unordered_map<ButtonState, SDL_FRect*>;
   ButtonTextureMap textureMap;
   ButtonState currentState = IDLE;

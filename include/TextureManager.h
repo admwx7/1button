@@ -21,8 +21,8 @@ class TextureManager {
     MENU_BUTTON_BACKGROUND,
     GAME_BACKGROUND,
     SPACE_BAR_ICON,
-    CARD_RPG,
-    CARD_ACTION,
+    CARD_GAME_GENRE_RPG,
+    CARD_GAME_GENRE_ACTION,
   };
 
  private:
@@ -33,8 +33,8 @@ class TextureManager {
       {MENU_BUTTON_BACKGROUND, Texture{nullptr, "menu-button-texture.png"}},
       {GAME_BACKGROUND, Texture{nullptr, "game-background.png"}},
       {SPACE_BAR_ICON, Texture{nullptr, "space-bar.png"}},
-      {CARD_RPG, Texture{nullptr, "card-rpg.png"}},
-      {CARD_ACTION, Texture{nullptr, "card-action.png"}},
+      {CARD_GAME_GENRE_RPG, Texture{nullptr, "card-rpg.png"}},
+      {CARD_GAME_GENRE_ACTION, Texture{nullptr, "card-action.png"}},
   };
   // std::vector<TokenRenderInfo> renderTokenCache = {};
 

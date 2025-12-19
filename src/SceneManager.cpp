@@ -26,25 +26,13 @@ ButtonEntity* SceneManager::createMenuButton(
       textureManager->getTexture(TextureManager::MENU_BUTTON_BACKGROUND),
       buttonPosition, action, {16.0f, 8.0f});
 }
-CardEntity* SceneManager::createCardEntity(
-    TextureManager::TextureName textureName) {
-  switch (textureName) {
-    case TextureManager::CARD_ACTION:
-    case TextureManager::CARD_RPG:
-      break;
-    case TextureManager::MENU_BACKGROUND:
-    case TextureManager::MENU_BUTTON_BACKGROUND:
-    case TextureManager::GAME_BACKGROUND:
-    case TextureManager::SPACE_BAR_ICON:
-      return nullptr;
-  }
-  return new CardEntity(textureManager->getTexture(textureName), nullptr);
-}
 
 SceneManager::SceneManager(GameState* state, TextureManager* textureManager,
+                           CardManager* cardManager,
                            std::function<void(void)> callback)
     : state(state),
       textureManager(textureManager),
+      cardManager(cardManager),
       sceneChangeCallback(callback) {
   space_icon = new Sprite<SpaceAnimationStates>(
       textureManager->getTexture(TextureManager::SPACE_BAR_ICON),
@@ -73,21 +61,33 @@ SceneManager::SceneManager(GameState* state, TextureManager* textureManager,
       SceneComponent::MAIN_MENU_BUTTONS,
       SceneComponent::GLOBAL_HUD,
   };
+  scenes[Scene::NEW_RUN] = {
+      SceneComponent::GAME_BACKGROUND,
+      SceneComponent::CARDS_RUN_MODIFIERS,
+      SceneComponent::GLOBAL_HUD,
+  };
   scenes[Scene::NEW_GAME] = {
       SceneComponent::GAME_BACKGROUND,
+      SceneComponent::GAME_HUD,
       SceneComponent::CARDS_GAME_MODIFIERS,
       SceneComponent::GLOBAL_HUD,
   };
-  scenes[Scene::NEW_CYCLE] = {
+  scenes[Scene::NEW_GAME_GENRE] = {
       SceneComponent::GAME_BACKGROUND,
       SceneComponent::GAME_HUD,
-      SceneComponent::CARDS_CYCLE_MODIFIERS,
+      SceneComponent::CARDS_GAME_GENRES,
+      SceneComponent::GLOBAL_HUD,
+  };
+  scenes[Scene::NEW_GAME_MECHANIC] = {
+      SceneComponent::GAME_BACKGROUND,
+      SceneComponent::GAME_HUD,
+      SceneComponent::CARDS_GAME_MECHANICS,
       SceneComponent::GLOBAL_HUD,
   };
   scenes[Scene::DAY_CYCLE] = {
       SceneComponent::GAME_BACKGROUND,
       SceneComponent::GAME_HUD,
-      SceneComponent::CARDS_CYCLE_DAY,
+      SceneComponent::CARDS_DAY,
       SceneComponent::GLOBAL_HUD,
   };
   scenes[Scene::NIGHT_CYCLE] = {
@@ -98,18 +98,18 @@ SceneManager::SceneManager(GameState* state, TextureManager* textureManager,
   scenes[Scene::END_CYCLE] = {
       SceneComponent::GAME_BACKGROUND,
       SceneComponent::GAME_HUD,
-      SceneComponent::CYCLE_SUMMARY,
+      SceneComponent::GAME_SUMMARY,
       SceneComponent::GLOBAL_HUD,
   };
   scenes[Scene::CYCLE_UNLOCK] = {
       SceneComponent::GAME_BACKGROUND,
       SceneComponent::GAME_HUD,
-      SceneComponent::CARDS_CYCLE_END,
+      SceneComponent::CARDS_UNLOCK,
       SceneComponent::GLOBAL_HUD,
   };
   scenes[Scene::END_GAME] = {
       SceneComponent::GAME_BACKGROUND,
-      SceneComponent::GAME_SUMMARY,
+      SceneComponent::RUN_SUMMARY,
       SceneComponent::GLOBAL_HUD,
   };
   scenes[Scene::EVENT_TIMED] = {
@@ -130,27 +130,26 @@ SceneManager::SceneManager(GameState* state, TextureManager* textureManager,
   gameEntities[SceneComponent::GAME_BACKGROUND] = {new Entity(
       textureManager->getTexture(TextureManager::GAME_BACKGROUND), NULL, NULL)};
   gameEntities[SceneComponent::MAIN_MENU_BUTTONS] = {
-      createMenuButton(ButtonEntity::NEW_GAME, 0, 3,
+      createMenuButton(ButtonEntity::NEW_RUN, 0, 3,
                        ButtonEntity::ButtonState::SELECTED),
       createMenuButton(ButtonEntity::SETTINGS, 1, 3),
       createMenuButton(ButtonEntity::EXIT_GAME, 2, 3),
   };
   gameEntities[SceneComponent::GLOBAL_HUD] = {space_icon};
   gameEntities[SceneComponent::GAME_HUD] = {};
-  gameEntities[SceneComponent::CARDS_GAME_MODIFIERS] = {
-      createCardEntity(TextureManager::CARD_ACTION),
-      createCardEntity(TextureManager::CARD_RPG)};
+  gameEntities[SceneComponent::CARDS_GAME_MODIFIERS] = {};
   gameEntities[SceneComponent::CARDS_EVENTS_RNG] = {};
   gameEntities[SceneComponent::CARDS_EVENTS_TIMED] = {};
-  gameEntities[SceneComponent::CARDS_CYCLE_MODIFIERS] = {};
-  gameEntities[SceneComponent::CARDS_CYCLE_DAY] = {};
-  gameEntities[SceneComponent::CARDS_CYCLE_END] = {};
-  gameEntities[SceneComponent::CYCLE_SUMMARY] = {};
+  gameEntities[SceneComponent::CARDS_GAME_GENRES] = {};
+  gameEntities[SceneComponent::CARDS_GAME_MECHANICS] = {};
+  gameEntities[SceneComponent::CARDS_DAY] = {};
+  gameEntities[SceneComponent::CARDS_UNLOCK] = {};
   gameEntities[SceneComponent::GAME_SUMMARY] = {};
+  gameEntities[SceneComponent::RUN_SUMMARY] = {};
 }
 SceneManager::~SceneManager() {
   for (auto& [state, entities] : gameEntities) {
-    for (Entity* entity : entities) {
+    for (auto entity : entities) {
       delete entity;
     }
     entities.clear();
@@ -158,6 +157,63 @@ SceneManager::~SceneManager() {
   gameEntities.clear();
 }
 void SceneManager::changeScene(Scene newScene) {
+  bool isCardScene = true;
+  SceneComponent sceneComponent;
+  CardManager::DeckType deckType;
+  int count = 3;
+
+  switch (newScene) {
+    case NEW_RUN:
+      SDL_Log("Changing to NEW_RUN scene");
+      sceneComponent = SceneComponent::CARDS_RUN_MODIFIERS;
+      deckType = CardManager::DeckType::RUN_MODIFIERS;
+      break;
+    case NEW_GAME:
+      sceneComponent = SceneComponent::CARDS_GAME_MODIFIERS;
+      deckType = CardManager::DeckType::GAME_MODIFIERS;
+      break;
+    case NEW_GAME_GENRE:
+      sceneComponent = SceneComponent::CARDS_GAME_GENRES;
+      deckType = CardManager::DeckType::GAME_GENRES;
+      break;
+    case NEW_GAME_MECHANIC:
+      sceneComponent = SceneComponent::CARDS_GAME_MECHANICS;
+      deckType = CardManager::DeckType::GAME_MECHANICS;
+      break;
+    case DAY_CYCLE:
+      sceneComponent = SceneComponent::CARDS_DAY;
+      deckType = CardManager::DeckType::PLAYER_ACTIONS;
+      break;
+    case CYCLE_UNLOCK:
+      sceneComponent = SceneComponent::CARDS_UNLOCK;
+      deckType = CardManager::DeckType::RUN_UNLOCKS;
+      break;
+    case EVENT_TIMED:
+      sceneComponent = SceneComponent::CARDS_EVENTS_TIMED;
+      deckType = CardManager::DeckType::EVENTS_TIMED;
+      break;
+    case EVENT_RNG:
+      sceneComponent = SceneComponent::CARDS_EVENTS_RNG;
+      deckType = CardManager::DeckType::EVENTS_RNG;
+      break;
+    case MAIN_MENU:
+    default:
+      isCardScene = false;
+      break;
+  }
+  if (isCardScene) {
+    // Clear existing cards
+    for (auto& entity : gameEntities[sceneComponent]) {
+      delete entity;
+    }
+    gameEntities[sceneComponent].clear();
+
+    // Draw new cards
+    for (auto& card : cardManager->drawCards(deckType, count, true)) {
+      SDL_Log("Drew card");
+      gameEntities[sceneComponent].push_back(card);
+    }
+  }
   currentScene = newScene;
   if (sceneChangeCallback != nullptr) {
     sceneChangeCallback();

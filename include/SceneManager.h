@@ -9,6 +9,7 @@
 
 #include "ButtonEntity.h"
 #include "CardEntity.h"
+#include "CardManager.h"
 #include "Entity.h"
 #include "GameState.h"
 #include "Sprite.h"
@@ -19,8 +20,10 @@ class SceneManager {
   enum Scene {
     MAIN_MENU,
     SETTINGS_MENU,
+    NEW_RUN,
     NEW_GAME,
-    NEW_CYCLE,
+    NEW_GAME_GENRE,
+    NEW_GAME_MECHANIC,
     DAY_CYCLE,
     NIGHT_CYCLE,
     END_CYCLE,
@@ -35,14 +38,16 @@ class SceneManager {
     MAIN_MENU_BUTTONS,
     GAME_BACKGROUND,
     GAME_HUD,
-    CARDS_GAME_MODIFIERS,
+    CARDS_RUN_MODIFIERS,
     CARDS_EVENTS_RNG,
     CARDS_EVENTS_TIMED,
-    CARDS_CYCLE_MODIFIERS,
-    CARDS_CYCLE_DAY,
-    CARDS_CYCLE_END,
-    CYCLE_SUMMARY,
+    CARDS_GAME_MODIFIERS,
+    CARDS_GAME_GENRES,
+    CARDS_GAME_MECHANICS,
+    CARDS_DAY,
+    CARDS_UNLOCK,
     GAME_SUMMARY,
+    RUN_SUMMARY,
   };
   enum SpaceAnimationStates {
     IDLE,
@@ -53,6 +58,7 @@ class SceneManager {
   Scene currentScene = MAIN_MENU;
   GameState* state = nullptr;
   TextureManager* textureManager = nullptr;
+  CardManager* cardManager = nullptr;
   std::unordered_map<Scene, std::vector<SceneComponent>> scenes = {};
   std::unordered_map<SceneComponent, std::vector<Entity*>> gameEntities = {};
   std::function<void(void)> sceneChangeCallback = nullptr;
@@ -61,7 +67,7 @@ class SceneManager {
   Sprite<SpaceAnimationStates>* space_icon = nullptr;
 
   SceneManager(GameState* state, TextureManager* textureManager,
-               std::function<void(void)> callback);
+               CardManager* cardManager, std::function<void(void)> callback);
   ~SceneManager();
   void changeScene(Scene newScene);
   Scene getCurrentScene() const;
@@ -72,5 +78,4 @@ class SceneManager {
   ButtonEntity* createMenuButton(
       ButtonEntity::ButtonAction action, int index, int totalButtons,
       ButtonEntity::ButtonState initialState = ButtonEntity::ButtonState::IDLE);
-  CardEntity* createCardEntity(TextureManager::TextureName textureName);
 };

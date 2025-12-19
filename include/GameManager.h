@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <assert.h>
 
+#include "CardManager.h"
 #include "Entity.h"
 #include "GameState.h"
 #include "SceneManager.h"
@@ -51,6 +52,7 @@ class GameManager {
   GameState* state = nullptr;
   SceneManager* sceneManager = nullptr;
   TextureManager* textureManager = nullptr;
+  CardManager* cardManager = nullptr;
   uint64_t keyHoldStart = 0;                 // milliseconds
   const uint64_t KEY_HOLD_THRESHOLD = 1000;  // milliseconds
   // TODO: update this to a vector of vectors to track game => selection

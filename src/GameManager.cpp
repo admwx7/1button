@@ -25,8 +25,9 @@ void updateEntityState(std::vector<Entity*>::iterator& selectedOptionIterator,
 
 GameManager::GameManager(GameState* state, TextureManager* textureManager)
     : state(state), textureManager(textureManager) {
+  cardManager = new CardManager(textureManager);
   sceneManager =
-      new SceneManager(state, textureManager,
+      new SceneManager(state, textureManager, cardManager,
                        std::bind(&GameManager::sceneChangedCallback, this));
   sceneChangedCallback();
 }
@@ -46,9 +47,9 @@ void GameManager::sceneChangedCallback() {
           SceneManager::MAIN_MENU_BUTTONS);
       break;
     }
-    case SceneManager::Scene::NEW_GAME:
+    case SceneManager::Scene::NEW_RUN:
       selectableEntities = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_GAME_MODIFIERS);
+          SceneManager::CARDS_RUN_MODIFIERS);
       break;
     case SceneManager::Scene::EVENT_RNG:
       selectableEntities = sceneManager->getEntitiesForSceneComponent(
@@ -59,16 +60,16 @@ void GameManager::sceneChangedCallback() {
           SceneManager::CARDS_EVENTS_TIMED);
       break;
     case SceneManager::Scene::DAY_CYCLE:
-      selectableEntities = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_CYCLE_DAY);
+      selectableEntities =
+          sceneManager->getEntitiesForSceneComponent(SceneManager::CARDS_DAY);
       break;
     case SceneManager::Scene::END_CYCLE:
       selectableEntities = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_CYCLE_END);
+          SceneManager::CARDS_UNLOCK);
       break;
-    case SceneManager::Scene::NEW_CYCLE:
+    case SceneManager::Scene::NEW_GAME:
       selectableEntities = sceneManager->getEntitiesForSceneComponent(
-          SceneManager::CARDS_CYCLE_MODIFIERS);
+          SceneManager::CARDS_GAME_MODIFIERS);
       break;
     // TODO: handle other scenes
     case SceneManager::Scene::NIGHT_CYCLE:
@@ -128,8 +129,8 @@ void GameManager::longPressAction() {
     case SceneManager::Scene::MAIN_MENU:
       switch (
           dynamic_cast<ButtonEntity*>(*selectedOptionIterator)->getAction()) {
-        case ButtonEntity::NEW_GAME:
-          sceneManager->changeScene(SceneManager::Scene::NEW_GAME);
+        case ButtonEntity::NEW_RUN:
+          sceneManager->changeScene(SceneManager::Scene::NEW_RUN);
           selectedCards.clear();
           break;
         case ButtonEntity::SETTINGS:
@@ -143,10 +144,10 @@ void GameManager::longPressAction() {
           break;
       }
       break;
-    case SceneManager::Scene::NEW_GAME:
-      selectCard(SceneManager::NEW_CYCLE);
+    case SceneManager::Scene::NEW_RUN:
+      selectCard(SceneManager::NEW_GAME);
       break;
-    case SceneManager::Scene::NEW_CYCLE:
+    case SceneManager::Scene::NEW_GAME:
       selectCard(SceneManager::DAY_CYCLE);
       break;
     case SceneManager::Scene::DAY_CYCLE:
@@ -163,7 +164,7 @@ void GameManager::longPressAction() {
       // CYCLE_UNLOCK or END_GAME
       break;
     case SceneManager::Scene::CYCLE_UNLOCK:
-      selectCard(SceneManager::NEW_CYCLE);
+      selectCard(SceneManager::NEW_GAME);
       break;
     case SceneManager::Scene::END_GAME:
       sceneManager->changeScene(SceneManager::MAIN_MENU);
