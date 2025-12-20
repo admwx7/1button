@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "GameState.h"
+#include "GlobalState.h"
 
 struct Texture {
   SDL_Texture* sdlTexture = nullptr;
@@ -26,7 +26,7 @@ class TextureManager {
   };
 
  private:
-  GameState* state = nullptr;
+  GlobalState* state = nullptr;
   // lookup map for textures
   std::unordered_map<TextureName, Texture> textureCache = {
       {MENU_BACKGROUND, Texture{nullptr, "menu-background.png"}},
@@ -41,7 +41,7 @@ class TextureManager {
   SDL_Texture* loadTexture(TextureName textureName);
 
  public:
-  TextureManager(GameState* state);
+  TextureManager(GlobalState* state);
   ~TextureManager();
   SDL_Texture* getTexture(TextureName name);
 };

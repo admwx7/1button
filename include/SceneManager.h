@@ -11,7 +11,7 @@
 #include "CardEntity.h"
 #include "CardManager.h"
 #include "Entity.h"
-#include "GameState.h"
+#include "GlobalState.h"
 #include "Sprite.h"
 #include "TextureManager.h"
 
@@ -56,7 +56,7 @@ class SceneManager {
 
  private:
   Scene currentScene = MAIN_MENU;
-  GameState* state = nullptr;
+  GlobalState* state = nullptr;
   TextureManager* textureManager = nullptr;
   CardManager* cardManager = nullptr;
   std::unordered_map<Scene, std::vector<SceneComponent>> scenes = {};
@@ -66,7 +66,7 @@ class SceneManager {
  public:
   Sprite<SpaceAnimationStates>* space_icon = nullptr;
 
-  SceneManager(GameState* state, TextureManager* textureManager,
+  SceneManager(GlobalState* state, TextureManager* textureManager,
                CardManager* cardManager, std::function<void(void)> callback);
   ~SceneManager();
   void changeScene(Scene newScene);

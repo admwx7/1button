@@ -23,7 +23,7 @@ void updateEntityState(std::vector<Entity*>::iterator& selectedOptionIterator,
   }
 }
 
-GameManager::GameManager(GameState* state, TextureManager* textureManager)
+GameManager::GameManager(GlobalState* state, TextureManager* textureManager)
     : state(state), textureManager(textureManager) {
   cardManager = new CardManager(textureManager);
   sceneManager =
@@ -34,7 +34,8 @@ GameManager::GameManager(GameState* state, TextureManager* textureManager)
 GameManager::~GameManager() {
   delete sceneManager;
   sceneManager = nullptr;
-  selectedCards.clear();
+  delete cardManager;
+  cardManager = nullptr;
 }
 void GameManager::sceneChangedCallback() {
   assert(sceneManager != nullptr);
@@ -130,8 +131,8 @@ void GameManager::longPressAction() {
       switch (
           dynamic_cast<ButtonEntity*>(*selectedOptionIterator)->getAction()) {
         case ButtonEntity::NEW_RUN:
+          studio = StudioState();
           sceneManager->changeScene(SceneManager::Scene::NEW_RUN);
-          selectedCards.clear();
           break;
         case ButtonEntity::SETTINGS:
           sceneManager->changeScene(SceneManager::Scene::SETTINGS_MENU);
@@ -185,7 +186,7 @@ void GameManager::longPressAction() {
   }
 }
 void GameManager::selectCard(SceneManager::Scene nextScene) {
-  selectedCards.push_back(dynamic_cast<CardEntity*>(*selectedOptionIterator));
+  studio.addCard(dynamic_cast<CardEntity*>(*selectedOptionIterator));
   sceneManager->changeScene(nextScene);
 }
 void GameManager::shortPressAction() {

@@ -3,7 +3,7 @@
 #include <string>
 
 #include "Entity.h"
-#include "GameState.h"
+#include "GlobalState.h"
 #include "Sprite.h"
 
 struct CardDimension {
@@ -22,8 +22,8 @@ class CardEntity : public Entity {
   Sprite<CardState>* sprite = nullptr;
   inline static CardDimension cardDimension;
   inline static const SDL_FRect position = {
-      (GameState::windowDimensions.width / 2) - 56.0f,
-      (GameState::windowDimensions.height / 2) - 80.0f, cardDimension.WIDTH,
+      (GlobalState::windowDimensions.width / 2) - 56.0f,
+      (GlobalState::windowDimensions.height / 2) - 80.0f, cardDimension.WIDTH,
       cardDimension.HEIGHT};
 
  public:
@@ -52,7 +52,7 @@ class CardEntity : public Entity {
   virtual bool render(SDL_Renderer* renderer, int index, int count) const {
     float totalWidth =
         count * (cardDimension.WIDTH + cardDimension.GAP) - cardDimension.GAP;
-    float startX = (GameState::windowDimensions.width - totalWidth) / 2.0f;
+    float startX = (GlobalState::windowDimensions.width - totalWidth) / 2.0f;
     startX += index * (cardDimension.WIDTH + cardDimension.GAP);
     sprite->setPosition(
         new SDL_FRect{startX, position.y, position.w, position.h});

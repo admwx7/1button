@@ -6,11 +6,11 @@
 #include <iostream>
 
 #include "../include/GameManager.h"
-#include "../include/GameState.h"
+#include "../include/GlobalState.h"
 #include "../include/ScreenManager.h"
 #include "../include/TextureManager.h"
 
-GameState* gameState = new GameState();
+GlobalState* globalState = new GlobalState();
 TextureManager* textureManager = nullptr;
 GameManager* gameManager = nullptr;
 ScreenManager* screenManager = nullptr;
@@ -26,10 +26,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
   // TODO: set virtual window size, maintain aspect ratio
   Uint32 windowFlags = SDL_WINDOW_RESIZABLE;
-  if (!SDL_CreateWindowAndRenderer("1Button", gameState->windowDimensions.width,
-                                   gameState->windowDimensions.height,
-                                   windowFlags, &gameState->window,
-                                   &gameState->renderer)) {
+  if (!SDL_CreateWindowAndRenderer(
+          "1Button", globalState->windowDimensions.width,
+          globalState->windowDimensions.height, windowFlags,
+          &globalState->window, &globalState->renderer)) {
     SDL_Log("Failed to create window and renderer: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
@@ -39,12 +39,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
   }
 
   SDL_SetRenderLogicalPresentation(
-      gameState->renderer, gameState->windowDimensions.width,
-      gameState->windowDimensions.height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+      globalState->renderer, globalState->windowDimensions.width,
+      globalState->windowDimensions.height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-  textureManager = new TextureManager(gameState);
-  gameManager = new GameManager(gameState, textureManager);
-  screenManager = new ScreenManager(gameState, gameManager);
+  textureManager = new TextureManager(globalState);
+  gameManager = new GameManager(globalState, textureManager);
+  screenManager = new ScreenManager(globalState, gameManager);
   return SDL_APP_CONTINUE;
 }
 
@@ -60,8 +60,8 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 }
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
-  delete gameState;
-  gameState = nullptr;
+  delete globalState;
+  globalState = nullptr;
   delete textureManager;
   textureManager = nullptr;
   delete gameManager;

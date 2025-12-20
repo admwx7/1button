@@ -27,7 +27,7 @@ ButtonEntity* SceneManager::createMenuButton(
       buttonPosition, action, {16.0f, 8.0f});
 }
 
-SceneManager::SceneManager(GameState* state, TextureManager* textureManager,
+SceneManager::SceneManager(GlobalState* state, TextureManager* textureManager,
                            CardManager* cardManager,
                            std::function<void(void)> callback)
     : state(state),
@@ -164,7 +164,6 @@ void SceneManager::changeScene(Scene newScene) {
 
   switch (newScene) {
     case NEW_RUN:
-      SDL_Log("Changing to NEW_RUN scene");
       sceneComponent = SceneComponent::CARDS_RUN_MODIFIERS;
       deckType = CardManager::DeckType::RUN_MODIFIERS;
       break;
@@ -210,7 +209,6 @@ void SceneManager::changeScene(Scene newScene) {
 
     // Draw new cards
     for (auto& card : cardManager->drawCards(deckType, count, true)) {
-      SDL_Log("Drew card");
       gameEntities[sceneComponent].push_back(card);
     }
   }

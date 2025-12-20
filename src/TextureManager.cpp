@@ -17,7 +17,7 @@ SDL_Texture* TextureManager::loadTexture(TextureName textureName) {
   return texture;
 }
 
-TextureManager::TextureManager(GameState* state) : state(state) {
+TextureManager::TextureManager(GlobalState* state) : state(state) {
   try {
     // TODO: look into async loading of textures
     for (auto& [name, texture] : textureCache) {

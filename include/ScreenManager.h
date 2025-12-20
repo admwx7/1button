@@ -4,18 +4,18 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "GameManager.h"
-#include "GameState.h"
+#include "GlobalState.h"
 #include "SceneManager.h"
 #include "TextureManager.h"
 
 class ScreenManager {
  private:
-  GameState* state = nullptr;
+  GlobalState* state = nullptr;
   GameManager* gameManager = nullptr;
   TTF_Font* font = nullptr;
 
  public:
-  ScreenManager(GameState* state, GameManager* gameManager);
+  ScreenManager(GlobalState* state, GameManager* gameManager);
   ~ScreenManager();
   SDL_AppResult renderFrame();
 };

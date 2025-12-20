@@ -1,6 +1,6 @@
 #include "../include/ScreenManager.h"
 
-ScreenManager::ScreenManager(GameState* state, GameManager* gameManager)
+ScreenManager::ScreenManager(GlobalState* state, GameManager* gameManager)
     : state(state), gameManager(gameManager) {
   char* font_path = NULL;
   SDL_asprintf(&font_path, "%s../assets/%s", SDL_GetBasePath(), "cinzel.ttf");
