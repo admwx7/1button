@@ -18,7 +18,6 @@ SDL_AppResult ScreenManager::renderFrame() {
   SDL_SetRenderDrawColor(state->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
   SDL_RenderClear(state->renderer);
 
-  const SceneManager::Scene scene = gameManager->getCurrentScene();
   if (!state->renderer || !font) {
     return SDL_APP_FAILURE;
   }

@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -15,10 +16,9 @@ struct CardDimension {
 class CardEntity : public Entity {
  public:
   enum class CardState { IDLE, SELECTED };
-  typedef void*(SDLCALL* CardMutatorCallback)(void* data);
+  std::function<void(void* gameState, void* prevCard)> mutator = nullptr;
 
  private:
-  CardMutatorCallback mutator = nullptr;
   Sprite<CardState>* sprite = nullptr;
   inline static CardDimension cardDimension;
   inline static const SDL_FRect position = {
@@ -27,7 +27,8 @@ class CardEntity : public Entity {
       cardDimension.HEIGHT};
 
  public:
-  CardEntity(SDL_Texture* texture, CardMutatorCallback callback)
+  CardEntity(SDL_Texture* texture,
+             std::function<void(void* gameState, void* prevCard)> callback)
       : Entity(texture, NULL, NULL),
         sprite(new Sprite<CardState>(
             texture, new SDL_FRect{position},

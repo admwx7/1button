@@ -6,7 +6,6 @@
 #include "Entity.h"
 #include "GlobalState.h"
 #include "SceneManager.h"
-#include "StudioState.h"
 #include "TextEntity.h"
 #include "TextureManager.h"
 
@@ -16,11 +15,11 @@ class GameManager {
   SceneManager* sceneManager = nullptr;
   TextureManager* textureManager = nullptr;
   CardManager* cardManager = nullptr;
+  GameState* gameState = nullptr;
   uint64_t keyHoldStart = 0;                 // milliseconds
   const uint64_t KEY_HOLD_THRESHOLD = 1000;  // milliseconds
   std::vector<Entity*> selectableEntities = {};
   std::vector<Entity*>::iterator selectedOptionIterator = {};
-  StudioState studio = StudioState();
 
   void sceneChangedCallback();
 
@@ -35,7 +34,4 @@ class GameManager {
   SceneManager::Scene getCurrentScene() const;
   std::vector<Entity*> getEntitiesForCurrentScene() const;
   SDL_AppResult handleEvent(SDL_Event* event);
-  void selectCard(
-      SceneManager::Scene nextScene,
-      StudioState::ModifierType modifierType = StudioState::GAME_MODIFIER);
 };

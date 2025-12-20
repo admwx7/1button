@@ -1,26 +1,54 @@
 #include "../include/CardManager.h"
 
-CardManager::CardManager(TextureManager* textureManager)
-    : textureManager(textureManager) {
-  initializeDeck(DeckType::RUN_MODIFIERS);
-  initializeDeck(DeckType::RUN_UNLOCKS);
-  initializeDeck(DeckType::GAME_MODIFIERS);
-  initializeDeck(DeckType::GAME_GENRES);
-  initializeDeck(DeckType::GAME_MECHANICS);
-  initializeDeck(DeckType::EVENTS_RNG);
-  initializeDeck(DeckType::EVENTS_TIMED);
-  initializeDeck(DeckType::PLAYER_ACTIONS);
-}
-CardManager::~CardManager() {
-  for (auto& [type, deck] : decks) {
-    for (CardEntity* card : deck) {
-      delete card;
-    }
-    deck.clear();
-  }
-  decks.clear();
+CardEntity* CardManager::createCardEntity(
+    TextureManager::TextureName textureName) {
+  return new CardEntity(
+      textureManager->getTexture(textureName),
+      [textureName](void* _gameState, void* _prevCard) {
+        GameState* gameState = static_cast<GameState*>(_gameState);
+        CardEntity* prevCard = static_cast<CardEntity*>(_prevCard);
+
+        switch (textureName) {
+          case TextureManager::TextureName::CARD_PLUS_1:
+            gameState->addScore(1);
+            break;
+          case TextureManager::TextureName::CARD_PLUS_2:
+            gameState->addScore(2);
+            break;
+          case TextureManager::TextureName::CARD_PLUS_3:
+            gameState->addScore(3);
+            break;
+          case TextureManager::TextureName::CARD_TIMES_2:
+            gameState->setScore(gameState->getScore() * 2);
+            break;
+          case TextureManager::TextureName::CARD_TIMES_3:
+            gameState->setScore(gameState->getScore() * 3);
+            break;
+          case TextureManager::TextureName::CARD_ECHO:
+            if (prevCard != nullptr && prevCard->mutator != nullptr) {
+              prevCard->mutator(gameState, nullptr);
+            }
+            break;
+          case TextureManager::TextureName::CARD_WORM:
+            gameState->setTarget((int)(gameState->getTarget() * 0.8f));
+            break;
+          default:
+            break;
+        }
+      });
 }
 
+CardManager::CardManager(TextureManager* textureManager)
+    : textureManager(textureManager) {
+  initialize();
+}
+CardManager::~CardManager() { clearDecks(); }
+
+void CardManager::initialize() {
+  initializeDeck(DeckType::AVAILABLE);
+  initializeDeck(DeckType::STACK);
+  initializeDeck(DeckType::DISCARD);
+}
 void CardManager::clearDecks() {
   for (auto& [type, deck] : decks) {
     clearDeck(type);
@@ -29,121 +57,44 @@ void CardManager::clearDecks() {
 }
 void CardManager::clearDeck(DeckType type) {
   auto& deck = decks[type];
-  for (CardEntity* card : deck) {
-    delete card;
+  if (type != DeckType::STACK) {
+    for (CardEntity* card : deck) {
+      delete card;
+    }
   }
   deck.clear();
 }
 void CardManager::initializeDeck(DeckType type) {
   switch (type) {
-    case DeckType::RUN_MODIFIERS: {
+    case DeckType::AVAILABLE: {
       decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_1),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_2),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_2),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_2),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_2),
+          createCardEntity(TextureManager::TextureName::CARD_PLUS_3),
+          createCardEntity(TextureManager::TextureName::CARD_TIMES_2),
+          createCardEntity(TextureManager::TextureName::CARD_TIMES_2),
+          createCardEntity(TextureManager::TextureName::CARD_TIMES_3),
+          createCardEntity(TextureManager::TextureName::CARD_ECHO),
+          createCardEntity(TextureManager::TextureName::CARD_WORM),
       };
+      shuffleDeck(type);
       break;
     }
-    case DeckType::RUN_UNLOCKS: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
+    case DeckType::STACK: {
+      decks[type] = std::vector<CardEntity*>{};
       break;
     }
-    case DeckType::GAME_MODIFIERS: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
-      break;
-    }
-    case DeckType::GAME_GENRES: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(
-              textureManager->getTexture(
-                  TextureManager::TextureName::CARD_GAME_GENRE_ACTION),
-              nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
-      break;
-    }
-    case DeckType::GAME_MECHANICS: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
-      break;
-    }
-    case DeckType::EVENTS_RNG: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
-      break;
-    }
-    case DeckType::EVENTS_TIMED: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
-      break;
-    }
-    case DeckType::PLAYER_ACTIONS: {
-      decks[type] = std::vector<CardEntity*>{
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-          new CardEntity(textureManager->getTexture(
-                             TextureManager::TextureName::CARD_GAME_GENRE_RPG),
-                         nullptr),
-      };
+    case DeckType::DISCARD: {
+      decks[type] = std::vector<CardEntity*>{};
       break;
     }
     default:
@@ -154,34 +105,42 @@ void CardManager::shuffleDeck(DeckType type) {
   auto& deck = decks[type];
   std::shuffle(deck.begin(), deck.end(), std::mt19937{std::random_device{}()});
 }
-std::vector<CardEntity*> CardManager::drawCards(DeckType type, int count,
-                                                bool returnUnique) {
+std::vector<CardEntity*> CardManager::drawCards(DeckType type) {
   std::vector<CardEntity*> drawnCards = {};
   auto& deck = decks[type];
   int index = 0;
-  for (int i = 0; i < count; ++i) {
-    if (returnUnique && i < deck.size()) {
-      index = i;
-    } else if (returnUnique && i >= deck.size()) {
-      break;
-    } else {
-      index = random() % deck.size();
-    }
-    drawnCards.push_back(new CardEntity(*deck.at(index)));
+  for (int i = 0; i < DRAW_COUNT && deck.size() > 0; ++i) {
+    drawnCards.push_back(deck.back());
+    decks[DeckType::DISCARD].push_back(deck.back());
+    deck.pop_back();
   }
   return drawnCards;
 }
 void CardManager::resetDeck(DeckType type) {
   auto& deck = decks[type];
-  for (CardEntity* card : deck) {
-    delete card;
-  }
-  deck.clear();
+  clearDeck(type);
   initializeDeck(type);
-  shuffleDeck(type);
 }
 void CardManager::resetAllDecks() {
   for (auto& [type, deck] : decks) {
     resetDeck(type);
   }
+}
+void CardManager::addToStack(CardEntity* card) {
+  decks[DeckType::STACK].push_back(card);
+}
+void CardManager::resolveStack(GameState* gameState) {
+  auto& stackDeck = decks[DeckType::STACK];
+  CardEntity* prevCard = nullptr;
+  for (CardEntity* card : stackDeck) {
+    if (card->mutator != nullptr) {
+      card->mutator(gameState, prevCard);
+    }
+    prevCard = card;
+  }
+  prevCard = nullptr;
+  stackDeck.clear();
+}
+bool CardManager::hasCards() const {
+  return decks.at(DeckType::AVAILABLE).size() > DRAW_COUNT;
 }

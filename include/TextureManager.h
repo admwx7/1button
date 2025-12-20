@@ -21,23 +21,30 @@ class TextureManager {
     MENU_BUTTON_BACKGROUND,
     GAME_BACKGROUND,
     SPACE_BAR_ICON,
-    CARD_GAME_GENRE_RPG,
-    CARD_GAME_GENRE_ACTION,
+    CARD_PLUS_1,
+    CARD_PLUS_2,
+    CARD_PLUS_3,
+    CARD_TIMES_2,
+    CARD_TIMES_3,
+    CARD_ECHO,
+    CARD_WORM,
   };
 
  private:
   GlobalState* state = nullptr;
-  // lookup map for textures
   std::unordered_map<TextureName, Texture> textureCache = {
       {MENU_BACKGROUND, Texture{nullptr, "menu-background.png"}},
       {MENU_BUTTON_BACKGROUND, Texture{nullptr, "menu-button-texture.png"}},
       {GAME_BACKGROUND, Texture{nullptr, "game-background.png"}},
       {SPACE_BAR_ICON, Texture{nullptr, "space-bar.png"}},
-      {CARD_GAME_GENRE_RPG, Texture{nullptr, "card-rpg.png"}},
-      {CARD_GAME_GENRE_ACTION, Texture{nullptr, "card-action.png"}},
+      {CARD_PLUS_1, Texture{nullptr, "card+1.png"}},
+      {CARD_PLUS_2, Texture{nullptr, "card+2.png"}},
+      {CARD_PLUS_3, Texture{nullptr, "card+3.png"}},
+      {CARD_TIMES_2, Texture{nullptr, "cardx2.png"}},
+      {CARD_TIMES_3, Texture{nullptr, "cardx3.png"}},
+      {CARD_ECHO, Texture{nullptr, "card-echo.png"}},
+      {CARD_WORM, Texture{nullptr, "card-worm.png"}},
   };
-  // std::vector<TokenRenderInfo> renderTokenCache = {};
-
   SDL_Texture* loadTexture(TextureName textureName);
 
  public:
